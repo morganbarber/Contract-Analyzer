@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contract Analyzer</title>
+    <style>
+        body {
+            background-color: #212121;
+            color: #f5f5f5;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            position: relative;
+        }
+
+        h1 {
+            margin: 2rem 0;
+            font-size: 5rem;
+            text-align: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: fadeIn 2s ease-in-out forwards, moveUp 1s 2s ease-in-out forwards;
+        }
+
+        textarea, button {
+            visibility: hidden;
+            opacity: 0;
+            animation: fadeIn 1s 3s ease-in-out forwards;
+        }
+
+        textarea {
+            width: 80%;
+            height: 300px;
+            border-radius: 10px;
+            border: 2px solid #f5f5f5;
+            background-color: #424242;
+            color: #f5f5f5;
+            padding: 1rem;
+            font-size: 1.2rem;
+            margin-top: 2rem;
+            resize: none;
+        }
+
+        textarea:focus {
+            outline: none;
+            border: 2px solid #90caf9;
+        }
+
+        button {
+            background-color: #90caf9;
+            border: none;
+            color: #212121;
+            padding: 0.5rem 2rem;
+            text-align: center;
+            font-size: 1.2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        button:hover {
+            background-color: #64b5f6;
+        }
+
+        button:active,
+        button.clicked {
+            transform: translateY(2px);
+            box-shadow: 0 4px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        #response-container {
+            width: 80%;
+            margin-top: 1rem;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            text-align: center;
+        }
+
+        #response {
+            display: inline-block;
+            background-color: #424242;
+            color: #f5f5f5;
+            padding: 1rem;
+            font-size: 1.2rem;
+            border-radius: 10px;
+            text-align: left;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+                visibility: visible;
+            }
+        }
+
+        @keyframes moveUp {
+            0% {
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+            }
+            100% {
+                top: 2rem;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Contract Analyzer</h1>
+    <textarea placeholder="Paste your contract here"></textarea>
+    <button id="submit-button">Submit</button>
+    <div id="response-container">
+      <pre id="response"></pre>
+    </div>
+    <script>
+      document.querySelector('#submit-button').addEventListener('click', async () => {
+        const contractText = document.querySelector('textarea').value;
+
+        const submitButton = document.getElementById('submit-button');
+        submitButton.classList.add('clicked');
+        setTimeout(() => {
+          submitButton.classList.remove('clicked');
+        }, 150);
+
+        const response = await fetch('/analyze', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ contractText }),
+          credentials: 'same-origin',
+        });
+
+        if (response.ok) {
+          const { summary } = await response.json();
+          const responseContainer = document.getElementById('response-container');
+          const responseElement = document.getElementById('response');
+          responseElement.textContent = `Summary:\n\n${summary}`;
+          responseContainer.style.opacity = 1;
+          responseContainer.style.visibility = 'visible';
+        } else {
+          alert('Error in analyzing contract');
+        }
+      });
+    </script>
+</body>
+</html>
